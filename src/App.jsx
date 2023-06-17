@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import './App.css'
 import startupsData from '../kaiku_data.json';
+import { Modal, Button, Typography, Sheet, ModalClose } from '@mui/joy';
 
 const App = () => {
   const [startups, setStartups] = useState(startupsData);
@@ -38,9 +39,9 @@ const App = () => {
           <li key={startup.id}>
             <h3>{startup.name}</h3>
             <p>{startup.oneLiner}</p>
-            <button onClick={() => acceptStartup(startup.id)}>Accept</button>
-            <button onClick={() => discardStartup(startup.id)}>Discard</button>
-            <button onClick={() => openModal(startup)}>More Info</button>
+            <Button onClick={() => acceptStartup(startup.id)}>Accept</Button>
+            <Button onClick={() => discardStartup(startup.id)}>Discard</Button>
+            <Button onClick={() => openModal(startup)}>More Info</Button>
           </li>
         ))}
       </ul>
@@ -51,38 +52,50 @@ const App = () => {
           <li key={startup.id}>
             <h3>{startup.name}</h3>
             <p>{startup.oneLiner}</p>
-            <button onClick={() => discardStartup(startup.id)}>Discard</button>
-            <button onClick={() => openModal(startup)}>More Info</button>
+            <Button onClick={() => discardStartup(startup.id)}>Discard</Button>
+            <Button onClick={() => openModal(startup)}>More Info</Button>
           </li>
         ))}
       </ul>
 
-      {selectedStartup && (
-        <div className="modal">
-          <div className="modal-content">
-            <span className="close" onClick={closeModal}>
-              &times;
-            </span>
-            <h2>{selectedStartup.name}</h2>
-            <p>Industry: {selectedStartup.industry}</p>
-            <p>Stage: {selectedStartup.stage}</p>
-            {/* Add more details as needed */}
-            <div>
-              {startups.some((startup) => startup.id === selectedStartup.id) && (
-                <>
-                  <button onClick={() => acceptStartup(selectedStartup.id)}>Accept</button>
-                  <button onClick={() => discardStartup(selectedStartup.id)}>Discard</button>
-                </>
-              )}
-              {acceptedStartups.some((startup) => startup.id === selectedStartup.id) && (
-                <button onClick={() => discardStartup(selectedStartup.id)}>Discard</button>
-              )}
-            </div>
+      <Modal open={!!selectedStartup} onClose={closeModal}>
+        <Sheet variant="outlined" sx={{ maxWidth: 500, borderRadius: 'md', p: 3, boxShadow: 'lg' }}>
+          <ModalClose
+            variant="outlined"
+            sx={{
+              top: 'calc(-1/4 * var(--IconButton-size))',
+              right: 'calc(-1/4 * var(--IconButton-size))',
+              boxShadow: '0 2px 12px 0 rgba(0, 0, 0, 0.2)',
+              borderRadius: '50%',
+              bgcolor: 'background.body',
+            }}
+            onClick={closeModal}
+          />
+          <Typography component="h2" id="modal-title" level="h4" textColor="inherit" fontWeight="lg" mb={1}>
+            {selectedStartup?.name}
+          </Typography>
+          <Typography id="modal-desc" textColor="text.tertiary">
+            Industry: {selectedStartup?.industry}
+          </Typography>
+          <Typography id="modal-desc" textColor="text.tertiary">
+            Stage: {selectedStartup?.stage}
+          </Typography>
+          <div>
+            {startups.some((startup) => startup.id === selectedStartup?.id) && (
+              <>
+                <Button onClick={() => acceptStartup(selectedStartup?.id)}>Accept</Button>
+                <Button onClick={() => discardStartup(selectedStartup?.id)}>Discard</Button>
+              </>
+            )}
+            {acceptedStartups.some((startup) => startup.id === selectedStartup?.id) && (
+              <Button onClick={() => discardStartup(selectedStartup?.id)}>Discard</Button>
+            )}
+            <Button onClick={closeModal}>Close</Button>
           </div>
-        </div>
-      )}
+        </Sheet>
+      </Modal>
     </div>
   );
 };
-export default App
 
+export default App;
