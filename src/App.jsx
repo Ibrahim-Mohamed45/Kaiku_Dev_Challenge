@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import './App.css';
 import startupsData from '../kaiku_data.json';
-import { Modal, Button, Typography, Sheet, ModalClose } from '@mui/joy';
+import { Modal, Typography, Sheet, ModalClose } from '@mui/joy';
 
 const App = () => {
   const [startups, setStartups] = useState(startupsData);
   const [acceptedStartups, setAcceptedStartups] = useState([]);
+  const [discardedStartups, setDiscardedStartups] = useState([]);
   const [selectedStartup, setSelectedStartup] = useState(null);
+  const [showDiscardedStartups, setShowDiscardedStartups] = useState(false);
 
   const openModal = (startup) => {
     setSelectedStartup(startup);
@@ -26,8 +28,24 @@ const App = () => {
   };
 
   const discardStartup = (startupId) => {
-    setStartups((prevStartups) => prevStartups.filter((startup) => startup.id !== startupId));
+    const selectedStartup = acceptedStartups.find((startup) => startup.id === startupId);
+    if (selectedStartup) {
+      setAcceptedStartups((prevAcceptedStartups) =>
+        prevAcceptedStartups.filter((startup) => startup.id !== startupId)
+      );
+      setDiscardedStartups((prevDiscardedStartups) => [...prevDiscardedStartups, selectedStartup]);
+    } else {
+      const selectedStartup = startups.find((startup) => startup.id === startupId);
+      if (selectedStartup) {
+        setStartups((prevStartups) => prevStartups.filter((startup) => startup.id !== startupId));
+        setDiscardedStartups((prevDiscardedStartups) => [...prevDiscardedStartups, selectedStartup]);
+      }
+    }
     closeModal();
+  };
+
+  const toggleDiscardedStartups = () => {
+    setShowDiscardedStartups((prevState) => !prevState);
   };
 
   return (
@@ -43,24 +61,24 @@ const App = () => {
                     <h3 className="text-xl font-bold">{startup.name}</h3>
                     <p>{startup.oneLiner}</p>
                     <div className="space-x-2 mt-2">
-                      <Button
+                      <button
                         onClick={() => acceptStartup(startup.id)}
-                        className="bg-green-500 hover:bg-green-600 text-white"
+                        className="bg-green-500 hover:bg-green-600 hover:border-green-700 !text-white"
                       >
                         Accept
-                      </Button>
-                      <Button
+                      </button>
+                      <button
                         onClick={() => discardStartup(startup.id)}
-                        className="bg-red-500 hover:bg-red-600 text-white"
+                        className="bg-red-500 hover:bg-red-600 hover:border-red-700 text-white"
                       >
                         Discard
-                      </Button>
-                      <Button
+                      </button>
+                      <button
                         onClick={() => openModal(startup)}
-                        className="bg-blue-500 hover:bg-blue-600 text-white"
+                        className="bg-blue-500 hover:bg-blue-600 hover:border-blue-700 text-white"
                       >
                         More Info
-                      </Button>
+                      </button>
                     </div>
                   </li>
                 ))}
@@ -76,18 +94,18 @@ const App = () => {
                     <h3 className="text-xl font-bold">{startup.name}</h3>
                     <p>{startup.oneLiner}</p>
                     <div className="space-x-2 mt-2">
-                      <Button
+                      <button
                         onClick={() => discardStartup(startup.id)}
-                        className="bg-red-500 hover:bg-red-600 text-white"
+                        className="bg-red-500 hover:bg-red-600 hover:border-red-700 text-white"
                       >
                         Discard
-                      </Button>
-                      <Button
+                      </button>
+                      <button
                         onClick={() => openModal(startup)}
-                        className="bg-blue-500 hover:bg-blue-600 text-white"
+                        className="bg-blue-500 hover:bg-blue-600 hover:border-blue-700 text-white"
                       >
                         More Info
-                      </Button>
+                      </button>
                     </div>
                   </li>
                 ))}
@@ -96,6 +114,29 @@ const App = () => {
           </div>
         </div>
       </div>
+
+        <button
+          onClick={toggleDiscardedStartups}
+          className="bg-gray-500 hover:bg-gray-600 hover:border-gray-700 text-white mb-4 ml-8"
+        >
+          {showDiscardedStartups ? 'Hide Discarded Startups' : 'Show Discarded Startups'}
+        </button>
+
+      {showDiscardedStartups && (
+        <div className="w-full">
+          <div className="bg-white rounded-lg p-6 shadow-lg my-8 mx-8">
+            <h2 className="text-3xl font-bold mb-6">Discarded Startups</h2>
+            <ul className="mb-4">
+              {discardedStartups.map((startup) => (
+                <li key={startup.id} className="mb-4">
+                  <h3 className="text-xl font-bold">{startup.name}</h3>
+                  <p>{startup.oneLiner}</p>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      )}
 
       <Modal open={!!selectedStartup} onClose={closeModal} className="flex items-center justify-center h-screen">
         <Sheet variant="outlined" className="rounded-md p-6 shadow-lg">
@@ -122,31 +163,32 @@ const App = () => {
           <div className="mt-4">
             {startups.some((startup) => startup.id === selectedStartup?.id) && (
               <>
-                <Button
+                <button
                   onClick={() => acceptStartup(selectedStartup?.id)}
-                  className="bg-green-500 hover:bg-green-600 text-white mr-2"
+                  className="bg-green-500 hover:bg-green-600 hover:border-green-700 text-white mr-2"
                 >
                   Accept
-                </Button>
-                <Button
+                </button>
+                <button
                   onClick={() => discardStartup(selectedStartup?.id)}
-                  className="bg-red-500 hover:bg-red-600 text-white"
+                  className="bg-red-500 hover:bg-red-600 hover:border-red-700 text-white"
                 >
                   Discard
-                </Button>
+                </button>
               </>
             )}
             {acceptedStartups.some((startup) => startup.id === selectedStartup?.id) && (
-              <Button
+              <button
                 onClick={() => discardStartup(selectedStartup?.id)}
-                className="bg-red-500 hover:bg-red-600 text-white"
+                className="bg-red-500 hover:bg-red-600 hover:border-red-700 text-white"
               >
                 Discard
-              </Button>
+              </button>
             )}
           </div>
         </Sheet>
       </Modal>
+        
     </div>
   );
 };
